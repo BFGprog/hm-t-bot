@@ -1,20 +1,26 @@
-# Используем OpenJDK 17
-FROM eclipse-temurin:17-jdk-alpine
 
-# Устанавливаем рабочую директорию
+FROM eclipse-temurin:17-jdk AS build
+
 WORKDIR /app
 
-# Копируем pom.xml и скачиваем зависимости
+# mvnw требует bash
+RUN apt-get update && apt-get install -y bash && rm -rf /var/lib/apt/lists/*
+
+COPY mvnw .
+COPY .mvn .mvn
 COPY pom.xml .
+
+RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B
 
-# Копируем исходники
-COPY src ./src
+COPY src src
+RUN ./mvnw package -DskipTests
 
-# Сборка приложения
-RUN ./mvnw clean package -DskipTests
+# -----------
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 9001
-
-# Запуск приложения
-ENTRYPOINT ["java","-jar","target/hm-t-bot-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

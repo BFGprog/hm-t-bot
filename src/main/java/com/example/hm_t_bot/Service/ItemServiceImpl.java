@@ -24,6 +24,10 @@ public class ItemServiceImpl implements ItemService {
         String answer = null;
         List<ItemDto> items = itemRepository.getAllItem();
         log.info("getItemDto: {}", items.size());
+        if (items.size() < 1){
+            ItemDto item = new ItemDto(1L, 0L, "Пусто");
+            items.add(item);
+        }
         for (ItemDto i : items) {
             answer = i.getRowNum().toString() + ". "
                     + i.getName() + "\n";
