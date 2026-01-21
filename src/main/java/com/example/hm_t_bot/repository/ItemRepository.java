@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -41,6 +42,18 @@ public class ItemRepository {
                         rs.getString("name")
                 )
         );
+    }
+
+    /*public void delItemById(String id) {
+        String sql = "delete from item " +
+                "where id in (" + id + ")";
+        jdbcTemplate.update(sql);
+    }*/
+
+    public int delItemById(List<Long> ids) {
+        String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sql = "delete from item where id in (" + placeholders + ")";
+        return jdbcTemplate.update(sql, ids.toArray());
     }
 
 

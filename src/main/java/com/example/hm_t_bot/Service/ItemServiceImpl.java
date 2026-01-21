@@ -7,12 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private Logger log = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private Logger log = LoggerFactory.getLogger(ItemServiceImpl.class);
     private final ItemRepository itemRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository) {
@@ -20,18 +21,63 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public String getItemDto() {
-        String answer = null;
+    public String getItemDtoRn() {
+        StringBuilder answer = new StringBuilder();
         List<ItemDto> items = itemRepository.getAllItem();
-        log.info("getItemDto: {}", items.size());
-        if (items.size() < 1){
-            ItemDto item = new ItemDto(1L, 0L, "Пусто");
-            items.add(item);
+        log.info("getItemDtoRn: {}", items.size());
+        if (items.size() < 1) {
+            return "0. Пусто";
         }
         for (ItemDto i : items) {
-            answer = i.getRowNum().toString() + ". "
-                    + i.getName() + "\n";
+            answer
+                    .append(i.getRowNum())
+                    .append(". ")
+                    .append(i.getName())
+                    .append('\n');
         }
-        return answer;
+        return answer.toString();
     }
+
+    @Override
+    public String getItemDtoId() {
+        StringBuilder answer = new StringBuilder();
+        List<ItemDto> items = itemRepository.getAllItem();
+        log.info("getItemDtoId: {}", items.size());
+        if (items.size() < 1) {
+            return "0. Пусто";
+        }
+        for (ItemDto i : items) {
+            answer
+                    .append(i.getId())
+                    .append(". ")
+                    .append(i.getName())
+                    .append("\n");
+        }
+        return answer + "перечислить номера через пробел";
+    }
+
+    /*@Override
+    public String delItem(String message) {
+            String ids = message.trim().replaceAll("\\s+", ",");
+            itemRepository.delItemById(ids);
+        return "Удалено " + ids;
+    }*/
+
+    ///
+    @Override
+    public String delItem(String message) {
+        String[] ids = message.trim().split("\\s+");
+        List<Long> idList = new ArrayList<>();
+        try {
+            for (String id : ids) {
+                idList.add(Long.parseLong(id));
+            }
+        } catch (NumberFormatException e) {
+            return "Ошибка. Номера через пробел (например: 1 2 3)";
+        }
+        return "Удалено: " + itemRepository.delItemById(idList) + " записей.";
+    }
+
+
+
 }

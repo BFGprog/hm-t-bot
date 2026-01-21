@@ -2,7 +2,7 @@ package com.example.hm_t_bot.listener;
 
 import com.example.hm_t_bot.Service.ItemService;
 import com.example.hm_t_bot.Service.MessageService;
-import com.example.hm_t_bot.repository.ItemRepository;
+import com.example.hm_t_bot.model.enums.Status;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 @Service
@@ -45,25 +47,37 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public void init() {
         telegramBot.setUpdatesListener(this);
     }
-
+    private final Map<Long, Status> chatStatus = new ConcurrentHashMap<>();
     @Override
     public int process(List<Update> updates) {
         updates.forEach(update -> {
-            String massage = update.message().text();
+            if (update.message() == null) return;
+            String message = update.message().text();
             Long chatId = update.message().chat().id();
-            log.info("Processing update: {}", massage);
-            if (massage == null) {
+            log.info("Processing update: {}", message);
+
+            if (message == null) {
                 messageService.answer(chatId, "null");
                 sendMenu(chatId);
-            } else if (massage.equals("/start")) {
+                chatStatus.put(chatId, Status.DEFAULT);
+            } else if (message.equals("/start")) {
                 messageService.answer(chatId, hello);
                 sendMenu(chatId);
-            } else if (massage.equals("/item")) {
-                messageService.answer(chatId, itemService.getItemDto());
-                sendButton(chatId);
+                chatStatus.put(chatId, Status.DEFAULT);
+            } else if (message.equals("/item") || message.equals("Покупки")) {
+                messageService.answer(chatId, itemService.getItemDtoRn());
+                //sendButton(chatId);
                 sendMenu(chatId);
+                chatStatus.put(chatId, Status.DEFAULT);
+            } else if (message.equals("/del") || message.equals("Куплено (удалить)")) {
+                messageService.answer(chatId, itemService.getItemDtoId());
+                chatStatus.put(chatId, Status.WAITING_ID);
+            } else if (chatStatus.getOrDefault(chatId, Status.DEFAULT)  == Status.WAITING_ID) {
+                messageService.answer(chatId, itemService.delItem(message));
+                chatStatus.put(chatId, Status.DEFAULT);
+
             } else {
-                messageService.answer(chatId, "500");
+                messageService.answer(chatId, "Не обработано");
                 sendMenu(chatId);
             }
 
@@ -75,7 +89,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(
                 //new String[]{"/start", "/item"},
                 //new String[]{"/settings"}
-                new String[]{"/item"}
+                new String[]{"Покупки","Куплено (удалить)"}
         )
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false);
@@ -86,15 +100,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(message);
     }
     private void sendButton(long chatId) {
-
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Куплено")
                         .switchInlineQueryCurrentChat("/del ")
         );
-
         SendMessage message = new SendMessage(chatId, "Нажми Куплено и допиши номера через пробел")
                 .replyMarkup(keyboard);
-
         telegramBot.execute(message);
     }
 

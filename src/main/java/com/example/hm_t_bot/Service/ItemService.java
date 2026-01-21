@@ -4,5 +4,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface ItemService {
-    String getItemDto();
+    String getItemDtoRn();
+    String getItemDtoId();
+    public String delItem(String message);
 }
