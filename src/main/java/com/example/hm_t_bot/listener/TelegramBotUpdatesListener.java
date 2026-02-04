@@ -30,7 +30,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final String hello = "Hello";
     private final Pattern pattern = Pattern.compile("^(?s)/rec\\s(.+)$"); //("^/rec"); //("^/rec\\s+(.+)$");
-    private final Pattern patternAdd = Pattern.compile("(?i)^добавить\\s*(.+)$");
+    private final Pattern patternAdd = Pattern.compile("(?i)^(добавить|добавь)\\s*(.+)$");
     private final DateTimeFormatter notificationDateTimeFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     private Logger log = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
