@@ -30,6 +30,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final String hello = "Hello";
     private final Pattern pattern = Pattern.compile("^(?s)/rec\\s(.+)$"); //("^/rec"); //("^/rec\\s+(.+)$");
+    private final Pattern patternAdd = Pattern.compile("(?i)^добавить\\s*(.+)$");
     private final DateTimeFormatter notificationDateTimeFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     private Logger log = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -47,7 +48,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public void init() {
         telegramBot.setUpdatesListener(this);
     }
+
     private final Map<Long, Status> chatStatus = new ConcurrentHashMap<>();
+
     @Override
     public int process(List<Update> updates) {
         updates.forEach(update -> {
@@ -72,10 +75,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             } else if (message.equals("/del") || message.equals("Куплено (удалить)")) {
                 messageService.answer(chatId, itemService.getItemDtoId());
                 chatStatus.put(chatId, Status.WAITING_ID);
-            } else if (chatStatus.getOrDefault(chatId, Status.DEFAULT)  == Status.WAITING_ID) {
+            } else if (chatStatus.getOrDefault(chatId, Status.DEFAULT) == Status.WAITING_ID) {
                 messageService.answer(chatId, itemService.delItem(message));
                 chatStatus.put(chatId, Status.DEFAULT);
-
+            } else if (patternAdd.matcher(message).matches()) {
+                chatStatus.put(chatId, Status.DEFAULT);
+                var matcher = patternAdd.matcher(message);
+                if (matcher.matches()) {
+                    messageService.answer(chatId, itemService.addItem(matcher.group(1)));
+                }
             } else {
                 messageService.answer(chatId, "Не обработано");
                 sendMenu(chatId);
@@ -84,21 +92,20 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
-    private void sendMenu(long chatId) {
 
+    private void sendMenu(long chatId) {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(
-                //new String[]{"/start", "/item"},
-                //new String[]{"/settings"}
-                new String[]{"Покупки","Куплено (удалить)"}
-        )
+                new String[][]{
+                        {"Покупки", "Куплено (удалить)"}
+                })
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false);
 
         SendMessage message = new SendMessage(chatId, "")
                 .replyMarkup(keyboard);
-
         telegramBot.execute(message);
     }
+
     private void sendButton(long chatId) {
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Куплено")

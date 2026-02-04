@@ -12,6 +12,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alisa
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+#      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
     networks:
       - backend
 

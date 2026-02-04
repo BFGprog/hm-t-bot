@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -75,9 +76,20 @@ public class ItemServiceImpl implements ItemService {
         } catch (NumberFormatException e) {
             return "Ошибка. Номера через пробел (например: 1 2 3)";
         }
-        return "Удалено: " + itemRepository.delItemById(idList) + " записей.";
+        return "Удалено: " + itemRepository.delItemById(idList) + " запись(-ей).";
     }
 
-
+    @Override
+    public String addItem(String message) {
+        List<String> items = Arrays.stream(message.split("[,\\.]+"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+        if (items.isEmpty()) {
+            return "Ошибка. Напиши, например: Добавить молоко, хлеб";
+        }
+        itemRepository.saveItems(items);
+        return "Добавлено " + items.size() + " запись(-ей).";
+    }
 
 }

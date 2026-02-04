@@ -7,4 +7,5 @@ public interface ItemService {
     String getItemDtoRn();
     String getItemDtoId();
     public String delItem(String message);
+    String addItem(String message);
 }
