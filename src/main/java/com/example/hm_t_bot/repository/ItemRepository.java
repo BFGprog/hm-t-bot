@@ -32,7 +32,7 @@ public class ItemRepository {
 
     public List<ItemDto> getAllItem() {
         return jdbcTemplate.query("""
-                    select row_number() OVER (ORDER BY create_date desc) as rowNum
+                    select row_number() OVER (ORDER BY create_date asc) as rowNum
                         ,id
                         ,name
                     from item

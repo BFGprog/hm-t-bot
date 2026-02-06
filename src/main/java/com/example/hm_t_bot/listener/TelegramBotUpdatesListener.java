@@ -101,7 +101,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false);
 
-        SendMessage message = new SendMessage(chatId, "")
+        SendMessage message = new SendMessage(chatId, " ")
                 .replyMarkup(keyboard);
         telegramBot.execute(message);
     }
