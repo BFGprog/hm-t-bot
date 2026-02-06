@@ -60,17 +60,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             log.info("Processing update: {}", message);
 
             if (message == null) {
-                messageService.answer(chatId, "null");
-                sendMenu(chatId);
+                //messageService.answer(chatId, "null");
+                sendMenu(chatId, "null");
                 chatStatus.put(chatId, Status.DEFAULT);
             } else if (message.equals("/start")) {
-                messageService.answer(chatId, hello);
-                sendMenu(chatId);
+                //messageService.answer(chatId, hello);
+                sendMenu(chatId, hello);
                 chatStatus.put(chatId, Status.DEFAULT);
             } else if (message.equals("/item") || message.equals("Покупки")) {
                 messageService.answer(chatId, itemService.getItemDtoRn());
                 //sendButton(chatId);
-                sendMenu(chatId);
+                //sendMenu(chatId);
                 chatStatus.put(chatId, Status.DEFAULT);
             } else if (message.equals("/del") || message.equals("Куплено (удалить)")) {
                 messageService.answer(chatId, itemService.getItemDtoId());
@@ -86,14 +86,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 }
             } else {
                 messageService.answer(chatId, "Не обработано");
-                sendMenu(chatId);
+                //sendMenu(chatId);
             }
 
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
-    private void sendMenu(long chatId) {
+    private void sendMenu(long chatId, String str) {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(
                 new String[][]{
                         {"Покупки", "Куплено (удалить)"}
@@ -101,7 +101,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false);
 
-        SendMessage message = new SendMessage(chatId, "Меню")
+        SendMessage message = new SendMessage(chatId, str)
                 .replyMarkup(keyboard);
         telegramBot.execute(message);
     }
