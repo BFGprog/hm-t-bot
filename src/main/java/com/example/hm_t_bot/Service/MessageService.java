@@ -6,4 +6,6 @@ import org.springframework.stereotype.Service;
 public interface MessageService {
 
     public void answer(Long chatId, String text);
+    void answerWithMenu(long chatId, String text);
+    void answerWithButton(long chatId);
 }
