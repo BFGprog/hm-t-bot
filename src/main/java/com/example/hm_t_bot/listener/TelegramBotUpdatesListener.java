@@ -74,11 +74,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             } else if (chatStatus.getOrDefault(chatId, Status.DEFAULT) == Status.WAITING_ID) {
                 messageService.answer(chatId, itemService.delItem(message));
                 chatStatus.put(chatId, Status.DEFAULT);
-            } else if (patternAdd.matcher(message).matches()) {
+            } else if (patternAdd.matcher(message.replace("\uFEFF", "")).matches()) {
                 var matcher = patternAdd.matcher(message);
                 messageService.answer(chatId, itemService.addItem(matcher.group(1)));
             } else {
-                messageService.answerWithMenu(chatId, message + "Не обработано");
+                messageService.answerWithMenu(chatId, message + " Не обработано");
                 chatStatus.put(chatId, Status.DEFAULT);
             }
 
