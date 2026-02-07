@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
                     .append(i.getName())
                     .append("\n");
         }
-        return answer + "перечислить номера через пробел";
+        return answer + "Перечислить номера через пробел";
     }
 
     /*@Override

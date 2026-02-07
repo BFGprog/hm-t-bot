@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -74,11 +75,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             } else if (chatStatus.getOrDefault(chatId, Status.DEFAULT) == Status.WAITING_ID) {
                 messageService.answer(chatId, itemService.delItem(message));
                 chatStatus.put(chatId, Status.DEFAULT);
-            } else if (patternAdd.matcher(message.replace("\uFEFF", "")).matches()) {
-                var matcher = patternAdd.matcher(message);
-                messageService.answer(chatId, itemService.addItem(matcher.group(1)));
+            } else if (patternAdd.matcher(message).matches()) {
+                Matcher matcher = patternAdd.matcher(message);
+                if (matcher.matches()) {
+                    messageService.answer(chatId, itemService.addItem(matcher.group(2)));
+                }
             } else {
-                messageService.answerWithMenu(chatId, message + " Не обработано");
+                messageService.answerWithMenu(chatId, message + "Не обработано");
                 chatStatus.put(chatId, Status.DEFAULT);
             }
 
